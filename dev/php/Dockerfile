@@ -12,7 +12,7 @@ RUN apt-get update && \
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-RUN docker-php-ext-install pdo_pgsql
+RUN docker-php-ext-install pdo_mysql
 RUN docker-php-ext-install zip
 
 WORKDIR /app
