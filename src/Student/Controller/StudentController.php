@@ -49,7 +49,7 @@ class StudentController extends AbstractController
             $student = $this->serializer->deserialize($payload,Student::class,'json');
             $this->studentService->validate($student);
             $id = $this->studentService->create($student);
-            return new JsonResponse(["status" => "success","message"=> "student was created with $id"]);
+            return new JsonResponse(["status" => "error","message"=> "student was created with $id"]);
         }
         catch (InvalidData  $e)
         {
@@ -57,7 +57,7 @@ class StudentController extends AbstractController
         }
         catch (\Exception $e)
         {
-            return new JsonResponse(["status" => "success","message"=> $e->getMessage()]);
+            return new JsonResponse(["status" => "error","message"=> $e->getMessage()]);
         }
 
 
@@ -67,14 +67,16 @@ class StudentController extends AbstractController
     /**
      * @Route("/student/{id}", methods={"PUT"}, requirements={"id"="\d+"})
      */
-    public function updateStudent(int $id, Request $request)
+    public function updateStudent(int $id,Request $request)
     {
         try
         {
         $payload = $request->getContent();
         $student = $this->serializer->deserialize($payload,Student::class,'json');
+        $student->setId($id);
         $this->validator->validate($student);
         $this->studentService->update($student);
+        $id = $student->getId();
         return new JsonResponse(["status" => "success","message"=> "user $id was updated"]);
         }
         catch (InvalidData  $e)
@@ -83,7 +85,7 @@ class StudentController extends AbstractController
         }
         catch (\Exception $e)
         {
-            return new JsonResponse(["status" => "success","message"=> $e->getMessage()]);
+            return new JsonResponse(["status" => "error","message"=> $e->getMessage()]);
         }
     }
 
@@ -116,9 +118,10 @@ class StudentController extends AbstractController
         {
             $payload = $request->getContent();
             $grade = $this->serializer->deserialize($payload,Grade::class,'json');
+            $grade->setStudentId($id);
             $this->studentService->validate($grade);
-            $id = $this->studentService->addGradeToStudent($grade,$id);
-            return new JsonResponse(["status" => "success","message"=> "student was created with $id"]);
+            $this->studentService->addGradeToStudent($grade,$id);
+            return new JsonResponse(["status" => "success","message"=> "grade added to student $id"]);
         }
         catch (InvalidData  $e)
         {
@@ -131,17 +134,18 @@ class StudentController extends AbstractController
     }
 
     /**
-     * @Route("student/{id}/grade/avg", methods={"GET"}, requirements={"id"="\d+"})
+     * @Route("/student/{id}/grade/avg", methods={"GET"}, requirements={"id"="\d+"})
      */
     public function getStudentAverage(int $id, Request $request)
     {
         try
         {
-            $this->studentService->getStudentGradeAverage($id);
+            $avg = $this->studentService->getStudentGradeAverage($id);
+            return new JsonResponse(["status" => "error","message"=> "grade average for student with id  $id : $avg"]);
         }
         catch (NotFound $e)
         {
-            return new JsonResponse(["status" => "error","message"=> "user $id was not found"]);
+            return new JsonResponse(["status" => "error","message"=> "student $id was not found"]);
         }
         catch (\Exception $e)
         {
@@ -156,15 +160,13 @@ class StudentController extends AbstractController
     {
         try
         {
-            $this->studentService->getStudentGradeAverage($id);
-        }
-        catch (NotFound $e)
-        {
-            return new JsonResponse(["status" => "error","message"=> "user $id was not found"]);
+            $avg = $this->studentService->getGradeAverage();
+            return new JsonResponse(["status" => "error","message"=> "grade average : $avg"]);
         }
         catch (\Exception $e)
         {
             return new JsonResponse(["status" => "error","message"=> "an error occured during the process please try later"]);
         }
+
     }
 }

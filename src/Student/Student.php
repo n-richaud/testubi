@@ -3,6 +3,7 @@
 
 namespace App\Student;
 
+use DateTimeImmutable;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Student\Grade;
 
@@ -21,10 +22,19 @@ class Student
      * @Assert\Date
      * @var string A "Y-m-d" formatted value
      */
-    private $birthDate;
+    private $birthdate;
 
-    /** @var Grade */
-    private $grades;
+
+    public static function fromDatabase(array $row): self
+    {
+        $student = new self();
+        $student->id = (int) $row['id'];
+        $student->lastname = $row['lastname'];
+        $student->firstname = $row['firstname'];
+        $student->birthdate = new DateTimeImmutable($row['birthdate']);
+
+        return $student;
+    }
 
     /**
      * @return int
@@ -76,36 +86,19 @@ class Student
     }
 
     /**
-     * @return Date
+     * @return \DateTimeImmutable
      */
-    public function getBirthDate(): Date
+    public function getBirthdate(): \DateTimeImmutable
     {
-        return $this->birtDate;
+        return $this->birthdate;
     }
 
     /**
      * @param Date $birthDate
      */
-    public function setBirthDate(string $birtDate): void
+    public function setBirthdate(string $birthdate): void
     {
-
-        $this->birthDate = new \DateTimeImmutable($birtDate);
-    }
-
-    /**
-     * @return \App\Student\Grade
-     */
-    public function getGrades(): \App\Student\Grade
-    {
-        return $this->grades;
-    }
-
-    /**
-     * @param \App\Student\Grade $grades
-     */
-    public function setGrades(\App\Student\Grade $grades): void
-    {
-        $this->grades = $grades;
+        $this->birthdate = new \DateTimeImmutable($birthdate);
     }
 
 

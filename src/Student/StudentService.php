@@ -5,6 +5,7 @@ namespace App\Student;
 
 use App\Infrastructure\Exception\InvalidData;
 use App\Infrastructure\Exception\NotFound;
+
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -27,6 +28,11 @@ class StudentService
     }
 
 
+    /**
+     * @param int $id
+     * @return Student
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function find(int $id): Student
     {
         $row = $this->db->fetchAssoc('SELECT * FROM `student` WHERE id = ?', [$id]);
@@ -37,35 +43,55 @@ class StudentService
         return Student::fromDatabase($row);
     }
 
+    /**
+     * @param Student $student
+     * @return int
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public  function create(Student $student): int
     {
         $this->db->insert('student', [
             'firstname'=> $student->getFirstname(),
             'lastname' => $student->getLastname(),
-            'birthdate' => $student->getBirthDate()
+            'birthdate' => $student->getBirthDate()->format('Y/m/d H:i:s')
         ]);
 
         return (int) $this->db->lastInsertId();
     }
 
+    /**
+     * @param Student $student
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function update(Student $student): void
     {
         $this->find($student->getId());
         $this->db->update('student', [
             'firstname'=> $student->getFirstname(),
             'lastname' => $student->getLastname(),
-            'birthdate' => $student->getBirthDate()
+            'birthdate' => $student->getBirthDate()->format('Y/m/d H:i:s')
         ], [
             'id' => $student->getId(),
         ]);
     }
 
+    /**
+     * @param int $id
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
+     */
     public function delete(int $id): void
     {
         $this->find($id);
+        dd($id);
         $this->db->delete('student',[$id]);
     }
 
+    /**
+     * @param Grade $grade
+     * @param int $id
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public  function addGradeToStudent(Grade $grade , int $id)
     {
         $this->find($id);
@@ -76,18 +102,33 @@ class StudentService
         ]);
     }
 
+    /**
+     * @param int $id
+     * @return mixed
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function getStudentGradeAverage(int $id)
     {
         $this->find($id);
-        $row = $this->db->fetchAssoc('SELECT AVG(grades) FROM `grades` WHERE student_id = ?', [$id]);
+        $row = $this->db->fetchAssoc('SELECT AVG(grade) as average FROM `grade` WHERE student_id = ?', [$id]);
+        return $row['average'];
     }
 
+    /**
+     * @return mixed
+     * @throws \Doctrine\DBAL\DBALException
+     */
     public function getGradeAverage()
     {
-        $row = $this->db->fetchAssoc('SELECT AVG(grades) FROM `grades`');
+        $row = $this->db->fetchAssoc('SELECT AVG(grade) as average FROM `grade`');
+        return $row['average'];
     }
 
-    public function validate(Student $student): void
+    /**
+     * @param $student
+     * @throws InvalidData
+     */
+    public function validate($student): void
     {
         $errors = $this->validator->validate($student);
         if (count($errors) > 0) {
@@ -96,6 +137,7 @@ class StudentService
 
         }
     }
+
 
 
 }
