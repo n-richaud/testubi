@@ -23,11 +23,11 @@ Method : POST
 
 {
 
-lastname: toto
+"lastname": "toto",
 
-firstname: dupont
+"firstname": "dupont",
 
-birthday: 1993-09-02 (date au format 8601)
+"birthdate": 1993-09-02 (date au format 8601)
 
 }
 #### Maj étudiant
@@ -37,36 +37,37 @@ Method : PUT
 
 {
 
-lastname: toto
+"lastname": "toto",
 
-firstname: dupont
+"firstname": "dupont",
 
-birthday: 1993-09-02
+"birthdate": "1993-09-02"
+
 
 }
-#### suppresion étudiant
+#### Suppresion étudiant
 /student/{id}
 
 Method : DELETE
 
 #### Ajout notes
-/student/{id}/grades/add
+/student/{id}/grade/add
 
 Method : POST
 
 {
 
-subject: maths
+"subject": "maths",
 
-grade: 12
+"grade": 12
 
 }
 ### Moyenne d'un étudiant
-/student/{id}/grades/average
+/student/{id}/grade/avg
 
 Method : GET
 
 #### Moyenne générale 
-/grades/average
+/grade/average
 
 Method : GET
